@@ -2,7 +2,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import api from '@/utils/api';
-import { FaTrash, FaPlus } from 'react-icons/fa';
+import { FaTrash, FaPlus, FaEdit } from 'react-icons/fa';
 import ImageUpload from '@/components/ImageUpload';
 
 export default function AdminExpertise() {
