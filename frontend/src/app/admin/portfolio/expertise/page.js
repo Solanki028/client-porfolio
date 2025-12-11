@@ -1,4 +1,3 @@
-```
 "use client";
 import { useEffect, useState } from 'react';
 import api from '@/utils/api';
@@ -30,7 +29,7 @@ export default function AdminExpertise() {
         e.preventDefault();
         try {
             if (editingId) {
-                await api.put(`/ portfolio / expertise / ${ editingId } `, formData);
+                await api.put(`/portfolio/expertise/${editingId}`, formData);
             } else {
                 await api.post('/portfolio/expertise', formData);
             }
@@ -51,7 +50,7 @@ export default function AdminExpertise() {
     const handleDelete = async (id) => {
         if (confirm('Are you sure you want to delete this item?')) {
             try {
-                await api.delete(`/ portfolio / expertise / ${ id } `);
+                await api.delete(`/portfolio/expertise/${id}`);
                 fetchItems();
             } catch (error) {
                 console.error('Error deleting item:', error);
