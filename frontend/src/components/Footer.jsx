@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import api from '@/utils/api';
-import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaWhatsapp } from 'react-icons/fa';
 
 const Footer = () => {
     const [settings, setSettings] = useState({
@@ -122,8 +122,15 @@ const Footer = () => {
                             )}
                             {settings.phone && (
                                 <li className="flex items-center">
-                                    <span className="text-brand-red mr-3">📞</span>
-                                    <a href={`tel:${settings.phone}`} className="hover:text-white transition-colors">{settings.phone}</a>
+                                    <a
+                                        href={`https://wa.me/${settings.phone.replace(/[^0-9]/g, '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center group hover:text-white transition-colors"
+                                    >
+                                        <FaWhatsapp className="text-brand-red mr-3 text-xl group-hover:text-[#25D366] transition-colors" />
+                                        <span>Chat on WhatsApp</span>
+                                    </a>
                                 </li>
                             )}
                         </ul>

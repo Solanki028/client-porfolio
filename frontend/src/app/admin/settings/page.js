@@ -109,8 +109,8 @@ export default function AdminSettings() {
                 <button
                     onClick={() => setActiveTab('general')}
                     className={`pb-4 px-4 font-medium transition-colors flex items-center space-x-2 ${activeTab === 'general'
-                            ? 'text-brand-red border-b-2 border-brand-red'
-                            : 'text-gray-400 hover:text-white'
+                        ? 'text-brand-red border-b-2 border-brand-red'
+                        : 'text-gray-400 hover:text-white'
                         }`}
                 >
                     <FaCog /> <span>General</span>
@@ -118,8 +118,8 @@ export default function AdminSettings() {
                 <button
                     onClick={() => setActiveTab('security')}
                     className={`pb-4 px-4 font-medium transition-colors flex items-center space-x-2 ${activeTab === 'security'
-                            ? 'text-brand-red border-b-2 border-brand-red'
-                            : 'text-gray-400 hover:text-white'
+                        ? 'text-brand-red border-b-2 border-brand-red'
+                        : 'text-gray-400 hover:text-white'
                         }`}
                 >
                     <FaLock /> <span>Security</span>
@@ -155,7 +155,7 @@ export default function AdminSettings() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-brand-text mb-2">Phone Number</label>
+                                <label className="block text-sm font-medium text-brand-text mb-2">WhatsApp Number</label>
                                 <input
                                     type="text"
                                     value={settings.phone}
