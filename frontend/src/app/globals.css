@@ -7,6 +7,9 @@
   --color-brand-gray: #1C1C1C;
   --color-brand-text: #EDEDED;
   --color-brand-muted: #A1A1A1;
+  /* Font Improvements */
+  --font-display: var(--font-outfit);
+  --font-body: var(--font-inter);
 }
 
 :root {
@@ -17,5 +20,16 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-inter), sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-outfit), sans-serif;
+  letter-spacing: -0.01em;
+  /* Slightly tighter for headings */
 }

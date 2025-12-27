@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import api from '@/utils/api';
 
 export default function AboutClient() {
-    const [aboutUs, setAboutUs] = useState({ text: '', image: '' });
+    const [aboutUs, setAboutUs] = useState({ text: '', images: [] });
     const [loading, setLoading] = useState(true);
+    const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -12,9 +13,21 @@ export default function AboutClient() {
                 const usRes = await api.get('/content/about_us');
                 if (usRes.data && usRes.data.content) {
                     if (typeof usRes.data.content === 'string') {
-                        setAboutUs({ text: usRes.data.content, image: '' });
+                        setAboutUs({ text: usRes.data.content, images: [] });
                     } else {
-                        setAboutUs(usRes.data.content);
+                        // Create a shallow copy to avoid mutating strict mode props if applicable
+                        const data = { ...usRes.data.content };
+
+                        // Migration/Safety logic
+                        if (data.image && (!data.images || data.images.length === 0)) {
+                            data.images = [data.image];
+                        }
+                        if (!data.images) data.images = [];
+
+                        // Filter out empty strings to prevent blank slides
+                        data.images = data.images.filter(img => img && img.trim() !== '');
+
+                        setAboutUs(data);
                     }
                 }
             } catch (error) {
@@ -26,6 +39,16 @@ export default function AboutClient() {
 
         fetchData();
     }, []);
+
+    // Carousel Logic
+    useEffect(() => {
+        if (aboutUs.images && aboutUs.images.length > 1) {
+            const interval = setInterval(() => {
+                setCurrentSlide((prev) => (prev + 1) % aboutUs.images.length);
+            }, 4000); // 4 Seconds
+            return () => clearInterval(interval);
+        }
+    }, [aboutUs.images]);
 
     if (loading) {
         return (
@@ -43,7 +66,6 @@ export default function AboutClient() {
                     <div className="mb-10">
                         <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 relative inline-block">
                             About Us
-                            <span className="absolute bottom-1 left-0 w-1/3 h-1.5 bg-brand-red"></span>
                         </h1>
                     </div>
 
@@ -54,14 +76,37 @@ export default function AboutClient() {
 
                 {/* Image Content */}
                 <div className="order-1 md:order-2 relative h-[500px] rounded-3xl overflow-hidden shadow-2xl border border-gray-800 bg-brand-dark group">
-                    {aboutUs.image ? (
-                        <div className="relative w-full h-full overflow-hidden">
-                            <div className="absolute inset-0 bg-brand-red/10 group-hover:bg-transparent transition-colors duration-500 z-10 pointer-events-none"></div>
-                            <img
-                                src={aboutUs.image}
-                                alt="About Us"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
+                    {aboutUs.images && aboutUs.images.length > 0 ? (
+                        <div className="relative w-full h-full">
+                            {aboutUs.images.map((img, index) => (
+                                <div
+                                    key={index}
+                                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100' : 'opacity-0'
+                                        }`}
+                                >
+                                    <div className="absolute inset-0 bg-brand-red/10 group-hover:bg-transparent transition-colors duration-500 z-10 pointer-events-none"></div>
+                                    <img
+                                        src={img}
+                                        alt={`About Us ${index + 1}`}
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    />
+                                </div>
+                            ))}
+
+                            {/* Indicators */}
+                            {aboutUs.images.length > 1 && (
+                                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
+                                    {aboutUs.images.map((_, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => setCurrentSlide(index)}
+                                            className={`h-2 rounded-full transition-all duration-300 ${index === currentSlide ? 'w-8 bg-brand-red' : 'w-2 bg-white/50 hover:bg-white'
+                                                }`}
+                                            aria-label={`Go to slide ${index + 1}`}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-brand-red/20 to-brand-black flex items-center justify-center">

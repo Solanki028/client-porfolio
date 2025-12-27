@@ -5,7 +5,7 @@ import ImageUpload from '@/components/ImageUpload';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 
 export default function AdminAbout() {
-    const [aboutUs, setAboutUs] = useState({ text: '', image: '' });
+    const [aboutUs, setAboutUs] = useState({ text: '', images: [] });
     const [homeHero, setHomeHero] = useState({
         tagline: '',
         description: '',
@@ -25,9 +25,13 @@ export default function AdminAbout() {
 
                 if (usRes.data && usRes.data.content) {
                     if (typeof usRes.data.content === 'string') {
-                        setAboutUs({ text: usRes.data.content, image: '' });
-                    } else {
-                        setAboutUs(usRes.data.content);
+                        const existingData = usRes.data.content;
+                        // Migration logic: If old 'image' exists and no 'images' array, migrate it
+                        if (existingData.image && (!existingData.images || existingData.images.length === 0)) {
+                            existingData.images = [existingData.image];
+                        }
+                        if (!existingData.images) existingData.images = [];
+                        setAboutUs(existingData);
                     }
                 }
 
@@ -54,9 +58,20 @@ export default function AdminAbout() {
         setSaving(true);
         setMessage('');
         try {
+            // Filter out empty image strings before saving
+            const cleanedAboutUs = {
+                ...aboutUs,
+                images: aboutUs.images.filter(img => img && img.trim() !== '')
+            };
+
+            const cleanedHomeHero = {
+                ...homeHero,
+                heroImages: homeHero.heroImages.filter(img => img && img.trim() !== '')
+            };
+
             await Promise.all([
-                api.put('/content/about_us', { content: aboutUs }),
-                api.put('/content/home_hero', { content: homeHero })
+                api.put('/content/about_us', { content: cleanedAboutUs }),
+                api.put('/content/home_hero', { content: cleanedHomeHero })
             ]);
             setMessage('Content updated successfully!');
         } catch (error) {
@@ -177,11 +192,49 @@ export default function AdminAbout() {
                             <p className="text-sm text-brand-muted mt-2">Supports HTML tags.</p>
                         </div>
                         <div>
-                            <ImageUpload
-                                label="About Image"
-                                currentImage={aboutUs.image}
-                                onUpload={(url) => setAboutUs({ ...aboutUs, image: url })}
-                            />
+                            <div>
+                                <label className="block text-md font-medium text-brand-text mb-4">
+                                    Carousel Images (Max 5)
+                                </label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {aboutUs.images && aboutUs.images.map((img, index) => (
+                                        <div key={index} className="relative p-4 border border-brand-dark rounded bg-black/20">
+                                            <div className="absolute top-2 right-2 z-10">
+                                                <button
+                                                    onClick={() => {
+                                                        const newImages = [...aboutUs.images];
+                                                        newImages.splice(index, 1);
+                                                        setAboutUs({ ...aboutUs, images: newImages });
+                                                    }}
+                                                    className="p-2 bg-red-500 rounded-full text-white hover:bg-red-700 transition-colors"
+                                                >
+                                                    <FaTrash size={12} />
+                                                </button>
+                                            </div>
+                                            <div className="mb-2 text-sm text-brand-muted">Slide {index + 1}</div>
+                                            <ImageUpload
+                                                label=""
+                                                currentImage={img}
+                                                onUpload={(url) => {
+                                                    const newImages = [...aboutUs.images];
+                                                    newImages[index] = url;
+                                                    setAboutUs({ ...aboutUs, images: newImages });
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+
+                                    {(!aboutUs.images || aboutUs.images.length < 5) && (
+                                        <button
+                                            onClick={() => setAboutUs({ ...aboutUs, images: [...aboutUs.images, ''] })}
+                                            className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-700 rounded hover:border-brand-red hover:bg-brand-red/5 transition-all h-full min-h-[200px]"
+                                        >
+                                            <FaPlus className="text-3xl text-gray-500 mb-2 group-hover:text-brand-red" />
+                                            <span className="text-gray-400">Add Slide Image</span>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

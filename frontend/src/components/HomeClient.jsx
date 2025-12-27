@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/utils/api';
 import AboutClient from './AboutClient';
+import { FaWhatsapp } from 'react-icons/fa';
 
 export default function HomeClient() {
     const [heroContent, setHeroContent] = useState({
@@ -13,17 +14,19 @@ export default function HomeClient() {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [whatsappNumber, setWhatsappNumber] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [heroRes, servicesRes] = await Promise.all([
+                const [heroRes, servicesRes, settingsRes] = await Promise.all([
                     api.get('/content/home_hero'),
-                    api.get('/services')
+                    api.get('/services'),
+                    api.get('/content/footer_settings')
                 ]);
 
                 if (heroRes.data && heroRes.data.content) {
-                    const data = heroRes.data.content;
+                    const data = { ...heroRes.data.content };
                     // Backward compatibility
                     if (data.heroImage && (!data.heroImages || data.heroImages.length === 0)) {
                         data.heroImages = [data.heroImage];
@@ -31,7 +34,14 @@ export default function HomeClient() {
                     if (!data.heroImages) data.heroImages = [];
                     setHeroContent(data);
                 }
-                setServices(servicesRes.data);
+
+                if (servicesRes.data) {
+                    setServices(servicesRes.data);
+                }
+
+                if (settingsRes?.data?.content?.phone) {
+                    setWhatsappNumber(settingsRes.data.content.phone.replace(/[^0-9]/g, ''));
+                }
             } catch (error) {
                 console.error('Error fetching home content:', error);
             } finally {
@@ -89,7 +99,7 @@ export default function HomeClient() {
                 <div className="relative z-20 max-w-7xl mx-auto px-4 w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <div className="text-left animate-fade-in-up">
                         <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-                            <span className="text-brand-red">BRAND</span> <br />
+                            <span className="text-brand-red">JK Designs</span> <br />
                             {heroContent.tagline}
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-lg leading-relaxed">
@@ -103,12 +113,15 @@ export default function HomeClient() {
                             >
                                 View Services
                             </Link>
-                            <Link
-                                href="/contact"
-                                className="px-8 py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-brand-black transition-all duration-300 text-center"
+                            <a
+                                href={`https://wa.me/${whatsappNumber}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-8 py-4 border-2 border-[#25D366] text-[#25D366] font-bold rounded-lg hover:bg-[#25D366] hover:text-white transition-all duration-300 text-center flex items-center justify-center space-x-2"
                             >
-                                Contact Us
-                            </Link>
+                                <FaWhatsapp className="text-xl" />
+                                <span>WhatsApp</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -140,7 +153,6 @@ export default function HomeClient() {
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 relative inline-block">
                             Our Services
-                            <span className="absolute -bottom-2 left-0 w-1/2 h-1 bg-brand-red"></span>
                         </h2>
                         <p className="text-gray-400 text-lg max-w-2xl mx-auto">
                             We offer a comprehensive suite of creative solutions to elevate your brand identity.
